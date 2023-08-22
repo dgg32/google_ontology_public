@@ -1,0 +1,10 @@
+CREATE CONSTRAINT IF NOT EXISTS FOR (o:Organization) REQUIRE o.wikidata_id IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS FOR (a:Category) REQUIRE a.wikidata_id IS UNIQUE;
+
+LOAD CSV WITH HEADERS FROM 'file:///node_organization.tsv' AS row FIELDTERMINATOR '\t' MERGE (o:Organization {wikidata_id: row.wikidata_id, name: row.name, type: row.type, wikipedia_url: row.wikipedia_url, description: row.description});
+LOAD CSV WITH HEADERS FROM 'file:///node_category.tsv' AS row FIELDTERMINATOR '\t' MERGE (a:Category {wikidata_id: row.wikidata_id, name: row.name, wikipedia_url: row.wikipedia_url, description: row.description});
+
+
+
+LOAD CSV WITH HEADERS FROM 'file:///edge_sells_to.tsv' AS row FIELDTERMINATOR '\t' MERGE (o1:Organization {wikidata_id: row.from}) MERGE (o2:Organization {wikidata_id: row.to}) MERGE (o1)-[r:SELLS_TO]->(o2);
+LOAD CSV WITH HEADERS FROM 'file:///edge_organization_is_a.tsv' AS row FIELDTERMINATOR '\t' MERGE (o:Organization {wikidata_id: row.from}) MERGE (ca:Category {wikidata_id: row.to}) MERGE (o)-[r:IS_A]->(ca);
